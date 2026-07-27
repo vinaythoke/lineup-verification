@@ -69,7 +69,14 @@ def main():
             cert_count += 1
             
         req_lineup = str(row1.get('requested_lineup_section')).strip() if row1.get('requested_lineup_section') else None
-        exp_lineup = str(row1.get('expected_lineup_section')).strip() if row1.get('expected_lineup_section') else 'C'
+        exp_raw = row1.get('expected_lineup_section')
+
+        if exp_raw:
+            exp_lineup = str(exp_raw).strip()
+        elif str(row1.get('verification_status')).strip() == 'Verified':
+            exp_lineup = req_lineup
+        else:
+            exp_lineup = 'C'
         
         is_mismatch = (req_lineup != exp_lineup)
         if is_mismatch:
