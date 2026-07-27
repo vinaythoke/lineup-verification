@@ -19,6 +19,7 @@ export default [
         console: 'readonly',
         URL: 'readonly',
         Blob: 'readonly',
+        FileReader: 'readonly',
         import: 'readonly',
         process: 'readonly',
         alert: 'readonly',
