@@ -52,22 +52,42 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
 
     // Add UTF-8 BOM (\uFEFF) and \r\n line endings for instant Excel & browser download support
     const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `satara_lineup_verification_report_${exportType.toLowerCase()}.csv`;
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    
-    setTimeout(() => {
-      if (document.body.contains(link)) {
-        document.body.removeChild(link);
-      }
-      URL.revokeObjectURL(url);
-    }, 200);
+    try {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Keep Object URL active for 60 seconds so browser download manager finishes saving file without hanging
+      setTimeout(() => {
+        try {
+          if (document.body.contains(link)) {
+            document.body.removeChild(link);
+          }
+          URL.revokeObjectURL(url);
+        } catch { /* ignore */ }
+      }, 60000);
+    } catch {
+      // Fallback Data URI method
+      const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = encodedUri;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
+      }, 1000);
+    }
 
     onClose();
   };
