@@ -28,10 +28,10 @@ export default function Header({ bunnyCdnUrl, totalCount: _totalCount, disapprov
         {/* CDN Info & Action Buttons */}
         <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t border-slate-800/80 md:border-0">
           
-          {/* Live Cloud Sync Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300">
+          {/* GitHub Live Sync Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-xs text-indigo-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold text-[11px]">Live Cloud Sync</span>
+            <span className="font-semibold text-[11px]">GitHub Permanent Sync</span>
           </div>
 
           {/* CDN Status Badge */}

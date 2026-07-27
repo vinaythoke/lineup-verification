@@ -7,7 +7,7 @@ import CertificateModal from './components/CertificateModal.jsx';
 import ExportModal from './components/ExportModal.jsx';
 import DisapproveModal from './components/DisapproveModal.jsx';
 import runnersData from './data/runners.json';
-import { fetchCloudDecisions, saveCloudDecisionsMap, resetCloudDecisionsMap } from './services/cloudSync.js';
+import { fetchGitHubDecisions, saveGitHubDecisionsMap, resetGitHubDecisionsMap } from './services/githubSync.js';
 
 const BUNNY_CDN_URL = import.meta.env.VITE_BUNNY_CDN_URL || 'https://runsatara.b-cdn.net';
 const SHOW_EMAIL = import.meta.env.VITE_SHOW_RUNNER_EMAIL === 'true';
@@ -26,7 +26,7 @@ export default function App() {
     }
   });
 
-  // Save to localStorage & sync to Cloud
+  // Save to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(organizerDecisions));
@@ -35,22 +35,22 @@ export default function App() {
     }
   }, [organizerDecisions]);
 
-  // Initial cloud fetch & periodic 4-second live sync across browsers
+  // Initial GitHub fetch & periodic 5-second live sync across browsers
   useEffect(() => {
     let isMounted = true;
 
-    const loadAndSyncCloud = async () => {
-      const cloudData = await fetchCloudDecisions();
-      if (cloudData && isMounted) {
-        setOrganizerDecisions(cloudData);
+    const loadAndSyncGitHub = async () => {
+      const gitHubData = await fetchGitHubDecisions();
+      if (gitHubData && isMounted && Object.keys(gitHubData).length > 0) {
+        setOrganizerDecisions(gitHubData);
       }
     };
 
     // Load immediately on mount
-    loadAndSyncCloud();
+    loadAndSyncGitHub();
 
-    // Poll every 4 seconds for live changes across devices
-    const intervalId = setInterval(loadAndSyncCloud, 4000);
+    // Poll every 5 seconds for live changes across devices
+    const intervalId = setInterval(loadAndSyncGitHub, 5000);
 
     return () => {
       isMounted = false;
@@ -100,7 +100,7 @@ export default function App() {
         const next = { ...organizerDecisions };
         delete next[runnerId];
         setOrganizerDecisions(next);
-        saveCloudDecisionsMap(next);
+        saveGitHubDecisionsMap(next);
       } else {
         alert('Incorrect Security PIN. Record was not changed.');
       }
@@ -118,14 +118,14 @@ export default function App() {
       }
     };
     setOrganizerDecisions(next);
-    saveCloudDecisionsMap(next);
+    saveGitHubDecisionsMap(next);
   };
 
   // Reset all organizer decisions
   const handleResetAllDecisions = () => {
     if (window.confirm('Are you sure you want to reset all manual organizer decisions back to default Approved?')) {
       setOrganizerDecisions({});
-      resetCloudDecisionsMap();
+      resetGitHubDecisionsMap();
     }
   };
 
