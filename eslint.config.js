@@ -22,6 +22,8 @@ export default [
         import: 'readonly',
         process: 'readonly',
         alert: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
       },
     },
     plugins: {

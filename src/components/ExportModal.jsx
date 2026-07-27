@@ -50,15 +50,26 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
       ].join(',');
     });
 
-    const csvContent = [headers.join(','), ...rows].join('\n');
+    // Add UTF-8 BOM (\uFEFF) and \r\n line endings for instant Excel & browser download support
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `satara_lineup_verification_report_${exportType.toLowerCase()}.csv`;
+
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `satara_lineup_verification_report_${exportType.toLowerCase()}.csv`);
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    
+    setTimeout(() => {
+      if (document.body.contains(link)) {
+        document.body.removeChild(link);
+      }
+      URL.revokeObjectURL(url);
+    }, 200);
+
+    onClose();
   };
 
   return (
