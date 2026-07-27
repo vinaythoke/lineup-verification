@@ -1,24 +1,54 @@
 # Satara Hill Half Marathon - Lineup Verification Tool 🏃‍♂️🏅
 
-A high-performance web application built for race organizers of the **Satara Hill Half Marathon** to manually review, filter, search, and verify runner registration proofs (certificates and result timing links) alongside AI-assisted lineup recommendations.
+A high-performance, real-time web application built for race organizers of the **Satara Hill Half Marathon** to review, verify, and allot lineup sections (E, A, B, C) for runner registration proofs (certificates & result links) alongside AI verification recommendations.
+
+---
+
+## ☁️ Live Cloud Synchronization Service: JSONBlob
+
+This application utilizes **[JSONBlob](https://jsonblob.com/)** for **100% free, real-time, multi-organizer persistence**:
+
+- **Service Provider**: [JSONBlob.com](https://jsonblob.com/) (Open-source RESTful JSON storage service).
+- **How It Works**:
+  1. When any organizer disproves a runner or reassigns a final lineup section (requiring security PIN authorization), the change is automatically saved to a shared, permanent cloud JSON endpoint.
+  2. All open browsers (incognito tabs, mobile phones, laptops, and teammate devices) automatically sync and update their UI, table rows, and stats counters live in real time via periodic background polling.
+  3. Decisions persist permanently in the cloud even when computers are powered off or opened days later.
 
 ---
 
 ## 🌟 Key Features
 
-- **⚡ Lightning Fast Browser Search & Filter**: Search 3,104 runners instantly by Name, Email, or Registration ID.
-- **🏷️ Lineup Discrepancy Highlighting**: Quick filter to highlight all runners whose requested lineup (E, A, B) differs from the AI-recommended lineup (E, A, B, C).
-- **✋ Organizer Decision Toggle**:
+- **⚡ Instant Search & Multi-Filter**: Filter 3,104 runners by Name, Registration ID, Mismatches, Claimed Lineup, AI Result, Evidence Type, or Organizer Decision.
+- **📱 Fully Responsive Mobile Design**: Automatically transforms into an app-like card layout on mobile devices (`< 768px`) with touch targets, while retaining the full interactive data grid on desktops (`≥ 768px`).
+- **☁️ Multi-Organizer Real-Time Sync**: Shared persistence powered by **JSONBlob** across all devices.
+- **🔐 PIN-Authorized Disapproval & Reassignment**:
   - All runners default to **Approved**.
-  - Organizers can quickly toggle any runner to **Disapproved** and add an optional reason note.
-  - Manual review progress persists automatically in the browser (`localStorage`).
+  - Disapproving a runner requires entering an **Organizer Security PIN** (configured via `.env`) and allows assigning a final lineup section (`E`, `A`, `B`, or `C`) along with an optional reason note.
 - **🖼️ Certificate Lightbox & PDF Viewer**:
-  - 1-Click modal viewer for JPG, PNG, and PDF certificates hosted on **Bunny CDN**.
-  - Zoom in/out, rotate 90°, and direct download buttons.
-  - **Keyboard Arrow Navigation**: Press `Left` / `Right` arrow keys to browse through certificates continuously.
-- **🔗 Automatic Link Sanitization**: Cleans and launches runner result links safely in a new browser tab.
-- **📊 CSV Audit Report Export**: Export all records or disapproved runners into a formatted CSV report.
-- **🌐 100% Free Hosting on Vercel**: Ready for 1-click deployment via GitHub.
+  - View JPG, PNG, and PDF certificates hosted on **Bunny CDN**.
+  - Zoom in/out, rotate 90°, and continuous keyboard arrow (`Left` / `Right`) navigation.
+- **📊 Instant CSV Audit Report Export**:
+  - Export full runner audit reports or filtered disapproved lists with UTF-8 BOM (`\uFEFF`) and Base64 Data URL streaming for instant cross-browser downloads.
+
+---
+
+## ⚙️ Environment Variables (.env)
+
+Create or edit the `.env` file in the root directory:
+
+```env
+# Bunny CDN URL for runner certificates
+VITE_BUNNY_CDN_URL=https://runsatara.b-cdn.net
+
+# Security PIN required for organizers to disprove or reassign lineups
+VITE_ORGANIZER_PIN=1234
+
+# Show or hide runner email IDs (true/false)
+VITE_SHOW_RUNNER_EMAIL=false
+
+# Optional custom Cloud Sync Endpoint (defaults to JSONBlob storage)
+VITE_CLOUD_SYNC_URL=https://jsonblob.com/api/jsonBlob/019fa402-5775-70b2-ae21-be5b4c7c8c26
+```
 
 ---
 
@@ -26,8 +56,9 @@ A high-performance web application built for race organizers of the **Satara Hil
 
 - **Frontend**: React 19 + Vite 6
 - **Styling**: Tailwind CSS v4 + Lucide Icons
-- **CDN Storage**: Bunny CDN (`https://runsatara.b-cdn.net/`)
-- **Data Pipeline**: Python openpyxl merging script (`scripts/merge_data.py`)
+- **Real-Time Cloud Persistence**: JSONBlob REST API (`jsonblob.com`)
+- **Certificate CDN**: Bunny CDN (`https://runsatara.b-cdn.net/`)
+- **Data Pipeline**: Python `openpyxl` merge script (`scripts/merge_data.py`)
 
 ---
 
@@ -38,18 +69,10 @@ A high-performance web application built for race organizers of the **Satara Hil
 npm install
 ```
 
-### 2. Configure Environment Variable (.env)
-Create a `.env` file in the root directory (or edit the existing one):
-```env
-VITE_BUNNY_CDN_URL=https://runsatara.b-cdn.net
-```
+### 2. Configure Environment Variable (`.env`)
+Ensure `.env` contains your CDN URL and Security PIN.
 
-### 3. Generate Clean Data (Optional if runners.json is updated)
-```bash
-npm run generate-data
-```
-
-### 4. Start Local Development Server
+### 3. Start Local Development Server
 ```bash
 npm run dev
 ```
@@ -57,52 +80,39 @@ Open `http://localhost:5173` in your browser.
 
 ---
 
-## 🌐 How to Deploy to Vercel (100% Free)
+## 🌐 Deploy to Vercel (100% Free)
 
-### Step 1: Upload Project to GitHub
-1. Create a new repository on your GitHub account (e.g. `satara-lineup-verification`).
-2. Run the following commands in your terminal:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit for Satara Hill Half Marathon Lineup Verification tool"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/satara-lineup-verification.git
-   git push -u origin main
-   ```
+This project is configured for Vercel deployment with SPA routing (`vercel.json`).
 
-### Step 2: Deploy on Vercel
-1. Log in to [Vercel](https://vercel.com/) (Sign up for free with your GitHub account).
-2. Click **"Add New..."** -> **"Project"**.
-3. Select your `satara-lineup-verification` GitHub repository.
-4. In **Environment Variables**, add:
-   - **Key**: `VITE_BUNNY_CDN_URL`
-   - **Value**: `https://runsatara.b-cdn.net`
-5. Click **"Deploy"**.
-
-Your application will be live in ~30 seconds with a free URL (e.g., `https://satara-lineup-verification.vercel.app`).
+1. Push your repository to GitHub (`vinaythoke/lineup-verification`).
+2. Import the project on [Vercel](https://vercel.com).
+3. Add Environment Variables (`VITE_BUNNY_CDN_URL`, `VITE_ORGANIZER_PIN`, etc.).
+4. Click **Deploy**.
 
 ---
 
 ## 📁 Project Structure
 
 ```
-├── .env                       # Bunny CDN Environment Configuration
-├── package.json               # Dependencies & build scripts
-├── vite.config.js             # Vite configuration
+├── .env                       # Environment configuration (CDN, PIN, Cloud URL)
+├── package.json               # Project dependencies & scripts
+├── vercel.json                # Vercel deployment & routing configuration
 ├── scripts/
-│   └── merge_data.py          # Python script to merge Excel files into runners.json
+│   └── merge_data.py          # Python script to process & merge Excel records into runners.json
 ├── src/
 │   ├── main.jsx               # React entry point
-│   ├── App.jsx                # Main layout, filters, & state management
-│   ├── index.css              # Global Tailwind CSS v4 styling
+│   ├── App.jsx                # Main application & sync controller
+│   ├── index.css              # Global Tailwind CSS v4 design system
 │   ├── data/
 │   │   └── runners.json       # Merged 3,104 runner dataset
+│   ├── services/
+│   │   └── cloudSync.js       # Real-time JSONBlob cloud persistence service
 │   └── components/
-│       ├── Header.jsx         # Branding & export header
-│       ├── StatsCards.jsx     # Summary overview cards
-│       ├── FilterBar.jsx      # Search & multi-dropdown toolbar
-│       ├── RunnerTable.jsx    # Paginated, sortable runner table
-│       ├── CertificateModal.jsx# Lightbox & PDF viewer with arrow navigation
-│       └── ExportModal.jsx    # CSV audit report exporter
+│       ├── Header.jsx         # Header with live cloud status badge
+│       ├── StatsCards.jsx     # Overview summary cards
+│       ├── FilterBar.jsx      # Search & filter toolbar
+│       ├── RunnerTable.jsx    # Responsive card view (<768px) & desktop table (≥768px)
+│       ├── CertificateModal.jsx# Lightbox & PDF certificate viewer
+│       ├── DisapproveModal.jsx # Security PIN & lineup reassignment modal
+│       └── ExportModal.jsx    # Base64 CSV audit report exporter
 ```
