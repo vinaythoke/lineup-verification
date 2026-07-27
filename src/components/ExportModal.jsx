@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Download, X, FileSpreadsheet, FileCode, CheckCircle2 } from 'lucide-react';
+import { Download, X, FileSpreadsheet } from 'lucide-react';
 
 export default function ExportModal({ runners, organizerDecisions, onClose }) {
-  const [exportType, setExportType] = useState('ALL'); // 'ALL' or 'DISAPPROVED_ONLY'
+  const [exportType, setExportType] = useState('ALL');
 
   const disapprovedCount = Object.values(organizerDecisions).filter(d => d.status === 'DISAPPROVED').length;
 
@@ -62,36 +62,37 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-150">
       
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl">
         
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-indigo-400" />
-            <h3 className="text-base font-bold text-white">Export Audit Report</h3>
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+              <FileSpreadsheet className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">Export Audit Report</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Download formatted CSV report for organizers</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white cursor-pointer"
+            className="p-1.5 rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <p className="text-xs text-slate-400 mb-5">
-          Download a CSV report containing runner registration data, AI verification results, and organizer manual decisions.
-        </p>
-
-        {/* Option Selection */}
+        {/* Option Selection Cards */}
         <div className="space-y-3 mb-6">
           
           <label 
             onClick={() => setExportType('ALL')}
-            className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
+            className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition duration-150 ${
               exportType === 'ALL'
-                ? 'bg-indigo-600/15 border-indigo-500 shadow-md'
-                : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                ? 'bg-indigo-50 dark:bg-indigo-500/15 border-indigo-500 shadow-sm ring-1 ring-indigo-500/50'
+                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-slate-300'
             }`}
           >
             <input
@@ -99,20 +100,20 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
               name="exportType"
               checked={exportType === 'ALL'}
               onChange={() => setExportType('ALL')}
-              className="mt-1 accent-indigo-500"
+              className="mt-1 accent-indigo-600"
             />
             <div>
-              <div className="text-xs font-semibold text-slate-100">Export All Records ({runners.length})</div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Complete list of all 3,104 runners with organizer decision flags.</div>
+              <div className="text-xs font-bold text-slate-900 dark:text-slate-100">Export All Records ({runners.length})</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Complete dataset of 3,104 runners with final allotted lineup.</div>
             </div>
           </label>
 
           <label 
             onClick={() => setExportType('DISAPPROVED_ONLY')}
-            className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition ${
+            className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition duration-150 ${
               exportType === 'DISAPPROVED_ONLY'
-                ? 'bg-rose-600/15 border-rose-500 shadow-md'
-                : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                ? 'bg-rose-50 dark:bg-rose-500/15 border-rose-500 shadow-sm ring-1 ring-rose-500/50'
+                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 hover:border-slate-300'
             }`}
           >
             <input
@@ -120,32 +121,32 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
               name="exportType"
               checked={exportType === 'DISAPPROVED_ONLY'}
               onChange={() => setExportType('DISAPPROVED_ONLY')}
-              className="mt-1 accent-rose-500"
+              className="mt-1 accent-rose-600"
             />
             <div>
-              <div className="text-xs font-semibold text-slate-100">
-                Export Disapproved / Flagged Only ({disapprovedCount})
+              <div className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                Export Disapproved Only ({disapprovedCount})
               </div>
-              <div className="text-[11px] text-slate-400 mt-0.5">Filter for runners flagged by organizers for section reassignment or disqualification.</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Export only runners flagged or reassigned by organizers.</div>
             </div>
           </label>
 
         </div>
 
-        {/* Buttons */}
-        <div className="flex items-center justify-end gap-3">
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition cursor-pointer"
+            className="px-4 py-2 rounded-full bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 text-xs font-semibold text-slate-700 dark:text-slate-300 transition cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleDownloadCSV}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shadow-md shadow-indigo-600/20 transition cursor-pointer"
           >
             <Download className="w-4 h-4" />
-            Download CSV Report
+            <span>Download CSV</span>
           </button>
         </div>
 

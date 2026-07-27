@@ -14,6 +14,23 @@ const ORGANIZER_PIN = import.meta.env.VITE_ORGANIZER_PIN || '1234';
 const STORAGE_KEY = 'shhm_organizer_decisions_v1';
 
 export default function App() {
+  // Theme state (Dark Mode by default with soft contrast)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('shhm_theme_mode');
+      return saved ? saved === 'dark' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('shhm_theme_mode', isDarkMode ? 'dark' : 'light');
+    } catch {}
+    document.documentElement.classList.toggle('dark', isDarkMode);
+  }, [isDarkMode]);
+
   // Organizer decisions state (persisted in localStorage)
   const [organizerDecisions, setOrganizerDecisions] = useState(() => {
     try {
@@ -172,7 +189,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       
       {/* Top Header */}
       <Header
@@ -181,6 +198,8 @@ export default function App() {
         disapprovedCount={stats.disapprovedCount}
         onExport={() => setIsExportModalOpen(true)}
         onResetAll={stats.disapprovedCount > 0 ? handleResetAllDecisions : null}
+        isDarkMode={isDarkMode}
+        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
       />
 
       {/* Main Content Body */}
