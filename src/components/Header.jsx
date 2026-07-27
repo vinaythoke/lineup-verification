@@ -28,11 +28,17 @@ export default function Header({ bunnyCdnUrl, totalCount: _totalCount, disapprov
         {/* CDN Info & Action Buttons */}
         <div className="flex flex-wrap items-center justify-between md:justify-end gap-2.5 pt-2 md:pt-0 border-t border-slate-800/80 md:border-0">
           
+          {/* Live Cloud Sync Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-[11px]">Live Cloud Sync</span>
+          </div>
+
           {/* CDN Status Badge */}
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/60 text-xs text-slate-300 max-w-full sm:max-w-none">
-            <Globe className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <Globe className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
             <span className="text-slate-400 text-[11px]">CDN:</span>
-            <span className="font-mono text-emerald-300 font-medium text-[11px] truncate max-w-[140px] sm:max-w-none">{bunnyCdnUrl}</span>
+            <span className="font-mono text-indigo-300 font-medium text-[11px] truncate max-w-[140px] sm:max-w-none">{bunnyCdnUrl}</span>
           </div>
 
           <div className="flex items-center gap-2">

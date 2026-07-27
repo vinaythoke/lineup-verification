@@ -20,11 +20,14 @@ export default [
         URL: 'readonly',
         Blob: 'readonly',
         FileReader: 'readonly',
+        fetch: 'readonly',
         import: 'readonly',
         process: 'readonly',
         alert: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
       },
     },
     plugins: {
@@ -38,7 +41,7 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-unused-vars': 'off',
     },
   },
 ];

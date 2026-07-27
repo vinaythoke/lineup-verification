@@ -7,6 +7,7 @@ import CertificateModal from './components/CertificateModal.jsx';
 import ExportModal from './components/ExportModal.jsx';
 import DisapproveModal from './components/DisapproveModal.jsx';
 import runnersData from './data/runners.json';
+import { fetchCloudDecisions, saveCloudDecisionsMap, resetCloudDecisionsMap } from './services/cloudSync.js';
 
 const BUNNY_CDN_URL = import.meta.env.VITE_BUNNY_CDN_URL || 'https://runsatara.b-cdn.net';
 const SHOW_EMAIL = import.meta.env.VITE_SHOW_RUNNER_EMAIL === 'true';
@@ -14,7 +15,7 @@ const ORGANIZER_PIN = import.meta.env.VITE_ORGANIZER_PIN || '1234';
 const STORAGE_KEY = 'shhm_organizer_decisions_v1';
 
 export default function App() {
-  // Organizer decisions state (persisted in localStorage)
+  // Organizer decisions state
   const [organizerDecisions, setOrganizerDecisions] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -25,7 +26,7 @@ export default function App() {
     }
   });
 
-  // Save to localStorage on change
+  // Save to localStorage & sync to Cloud
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(organizerDecisions));
@@ -33,6 +34,29 @@ export default function App() {
       console.error('Failed to save organizer decisions:', e);
     }
   }, [organizerDecisions]);
+
+  // Initial cloud fetch & periodic 4-second live sync across browsers
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAndSyncCloud = async () => {
+      const cloudData = await fetchCloudDecisions();
+      if (cloudData && isMounted) {
+        setOrganizerDecisions(cloudData);
+      }
+    };
+
+    // Load immediately on mount
+    loadAndSyncCloud();
+
+    // Poll every 4 seconds for live changes across devices
+    const intervalId = setInterval(loadAndSyncCloud, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,11 +97,10 @@ export default function App() {
       const enteredPin = window.prompt('Enter Organizer Security PIN to revert runner back to Approved:');
       if (enteredPin === null) return; // cancelled
       if (String(enteredPin).trim() === String(ORGANIZER_PIN).trim()) {
-        setOrganizerDecisions(prev => {
-          const next = { ...prev };
-          delete next[runnerId];
-          return next;
-        });
+        const next = { ...organizerDecisions };
+        delete next[runnerId];
+        setOrganizerDecisions(next);
+        saveCloudDecisionsMap(next);
       } else {
         alert('Incorrect Security PIN. Record was not changed.');
       }
@@ -86,20 +109,23 @@ export default function App() {
 
   // Confirm Disapproval and Reassign Lineup Section
   const handleConfirmDisapprove = (runnerId, assignedLineup, note) => {
-    setOrganizerDecisions(prev => ({
-      ...prev,
+    const next = {
+      ...organizerDecisions,
       [runnerId]: {
         status: 'DISAPPROVED',
         assignedLineup,
         note
       }
-    }));
+    };
+    setOrganizerDecisions(next);
+    saveCloudDecisionsMap(next);
   };
 
   // Reset all organizer decisions
   const handleResetAllDecisions = () => {
     if (window.confirm('Are you sure you want to reset all manual organizer decisions back to default Approved?')) {
       setOrganizerDecisions({});
+      resetCloudDecisionsMap();
     }
   };
 
