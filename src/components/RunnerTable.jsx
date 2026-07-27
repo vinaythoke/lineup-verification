@@ -79,8 +79,147 @@ export default function RunnerTable({
   return (
     <div className="bg-slate-900/80 border border-slate-800 rounded-xl shadow-2xl overflow-hidden backdrop-blur-md">
       
-      {/* Table Container */}
-      <div className="overflow-x-auto">
+      {/* MOBILE CARD VIEW (Visible < 768px) */}
+      <div className="block md:hidden divide-y divide-slate-800/80">
+        {paginatedRunners.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 text-xs px-4">
+            No runners match your search & filter criteria.
+          </div>
+        ) : (
+          paginatedRunners.map((runner) => {
+            const decision = organizerDecisions[runner.id] || { status: 'APPROVED' };
+            const isDisapproved = decision.status === 'DISAPPROVED';
+            const fullCertUrl = runner.certificateFile 
+              ? `${bunnyCdnUrl.replace(/\/$/, '')}/${runner.certificateFile}`
+              : null;
+
+            return (
+              <div 
+                key={runner.id}
+                className={`p-4 space-y-3 transition ${
+                  isDisapproved 
+                    ? 'bg-rose-950/25' 
+                    : runner.isMismatch 
+                      ? 'bg-amber-950/15' 
+                      : 'hover:bg-slate-800/30'
+                }`}
+              >
+                {/* Header: Name & Reg ID */}
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h3 className="font-bold text-slate-100 text-sm">{runner.name}</h3>
+                    <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
+                      {showEmail && runner.email && <span>{runner.email}</span>}
+                      {showEmail && runner.email && <span className="text-slate-600">•</span>}
+                      <span className="font-mono text-slate-500 text-[10px]">{runner.id}</span>
+                    </div>
+                  </div>
+
+                  {/* Decision Toggle Button (Mobile Touch Target) */}
+                  <button
+                    onClick={() => onToggleStatus(runner.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition cursor-pointer shrink-0 active:scale-95 ${
+                      isDisapproved
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/50'
+                        : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                    }`}
+                  >
+                    {isDisapproved ? (
+                      <>
+                        <XCircle className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Disapproved ({decision.assignedLineup || 'C'})</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Approved</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Lineup & Timing Details Grid */}
+                <div className="grid grid-cols-2 gap-2 bg-slate-950/80 p-2.5 rounded-lg border border-slate-800/80 text-xs">
+                  {/* Claimed */}
+                  <div>
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase mb-1">Claimed</div>
+                    <div className="flex items-center gap-1">
+                      {renderLineupBadge(runner.requestedLineup)}
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1 capitalize">
+                      {runner.claimedRaceType || 'N/A'} {runner.claimedFinishTime && `(${runner.claimedFinishTime})`}
+                    </div>
+                  </div>
+
+                  {/* AI Result */}
+                  <div>
+                    <div className="text-[10px] text-slate-500 font-semibold uppercase mb-1">AI Result</div>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      {renderLineupBadge(runner.expectedLineup, true, runner.isMismatch)}
+                    </div>
+                    <div className="text-[11px] text-slate-400 mt-1 capitalize">
+                      {runner.verifiedRaceType || runner.verificationSource || 'N/A'} {runner.verifiedFinishTime && `(${runner.verifiedFinishTime})`}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Reassigned Badge & Notes if Disapproved */}
+                {isDisapproved && (
+                  <div className="flex items-center justify-between gap-2 text-xs bg-rose-950/40 p-2 rounded-lg border border-rose-500/30">
+                    <span className="text-rose-300 font-medium text-[11px]">
+                      ↳ Reassigned: <strong className="text-white">Lineup {decision.assignedLineup || 'C'}</strong>
+                    </span>
+                    {decision.note && (
+                      <span className="text-[10px] text-rose-300/80 italic truncate max-w-[150px]" title={decision.note}>
+                        "{decision.note}"
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Proof Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  {runner.certificateFile ? (
+                    <button
+                      onClick={() => onOpenCertificate(runner, fullCertUrl)}
+                      className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-medium transition cursor-pointer active:scale-95"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>View Certificate</span>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] text-slate-500 italic px-2">No Certificate</span>
+                  )}
+
+                  {runner.resultLinkClean ? (
+                    <a
+                      href={runner.resultLinkClean}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-300 text-xs font-medium transition active:scale-95"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Result Link</span>
+                    </a>
+                  ) : runner.resultLinkRaw ? (
+                    <span 
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded bg-slate-800 text-slate-400 text-[10px] max-w-[120px] truncate" 
+                      title={`Raw text: "${runner.resultLinkRaw}"`}
+                    >
+                      <Info className="w-3 h-3 shrink-0 text-slate-500" />
+                      <span>{runner.resultLinkRaw}</span>
+                    </span>
+                  ) : null}
+                </div>
+
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* DESKTOP TABLE VIEW (Visible >= 768px) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
@@ -279,27 +418,29 @@ export default function RunnerTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="bg-slate-950/90 border-t border-slate-800 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+      <div className="bg-slate-950/90 border-t border-slate-800 px-3 sm:px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
         
-        <div className="flex items-center gap-2">
-          <span>Rows per page:</span>
-          <select
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
-          >
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-            <option value={200}>200</option>
-          </select>
-          <span className="ml-2">
-            Showing <strong>{startIndex + 1}</strong> - <strong>{Math.min(startIndex + pageSize, sortedRunners.length)}</strong> of <strong>{sortedRunners.length}</strong> runners
+        <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto gap-2">
+          <div className="flex items-center gap-1.5">
+            <span>Rows:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              className="bg-slate-900 border border-slate-700 text-slate-200 rounded px-2 py-1 text-xs focus:outline-none"
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
+          </div>
+          <span className="text-[11px] sm:text-xs">
+            <strong>{startIndex + 1}</strong>-<strong>{Math.min(startIndex + pageSize, sortedRunners.length)}</strong> of <strong>{sortedRunners.length}</strong>
           </span>
         </div>
 
         {/* Page Nav Buttons */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center justify-center gap-1 w-full sm:w-auto pt-2 sm:pt-0 border-t border-slate-800 sm:border-0">
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
@@ -317,8 +458,8 @@ export default function RunnerTable({
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <span className="px-3 font-medium text-slate-200">
-            Page {currentPage} of {totalPages}
+          <span className="px-2.5 font-semibold text-slate-200 text-xs">
+            {currentPage} / {totalPages}
           </span>
 
           <button

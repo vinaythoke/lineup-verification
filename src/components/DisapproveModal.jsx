@@ -37,19 +37,19 @@ export default function DisapproveModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in">
       
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl w-full max-w-md p-4 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
-              <ShieldAlert className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+              <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">Disapprove / Reassign Runner</h3>
-              <p className="text-xs text-slate-400">Modify final lineup allotment for this runner</p>
+              <h3 className="text-sm sm:text-base font-bold text-white">Disapprove / Reassign Runner</h3>
+              <p className="text-[11px] sm:text-xs text-slate-400">Modify final lineup allotment for this runner</p>
             </div>
           </div>
           <button
@@ -61,9 +61,9 @@ export default function DisapproveModal({
         </div>
 
         {/* Runner Info Summary Banner */}
-        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3 mb-5 text-xs">
-          <div className="font-semibold text-slate-200 text-sm">{runner.name}</div>
-          <div className="text-slate-400 font-mono text-[11px] mt-0.5">{runner.id}</div>
+        <div className="bg-slate-950/90 border border-slate-800 rounded-xl p-3 mb-4 text-xs">
+          <div className="font-semibold text-slate-200 text-xs sm:text-sm">{runner.name}</div>
+          <div className="text-slate-400 font-mono text-[10px] sm:text-[11px] mt-0.5">{runner.id}</div>
           
           <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-800 text-[11px]">
             <div>
@@ -84,7 +84,7 @@ export default function DisapproveModal({
             <label className="block text-xs font-semibold text-slate-300 mb-2">
               Allot Final Lineup Section <span className="text-rose-400">*</span>
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               {['E', 'A', 'B', 'C'].map((section) => {
                 const isSelected = assignedLineup === section;
                 return (
@@ -92,7 +92,7 @@ export default function DisapproveModal({
                     key={section}
                     type="button"
                     onClick={() => setAssignedLineup(section)}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold border transition cursor-pointer flex flex-col items-center gap-0.5 ${
+                    className={`py-2 px-2 rounded-lg text-xs font-bold border transition cursor-pointer flex flex-col items-center gap-0.5 active:scale-95 ${
                       isSelected
                         ? section === 'C'
                           ? 'bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/20'
@@ -140,27 +140,27 @@ export default function DisapproveModal({
 
           {/* Error Message */}
           {errorMsg && (
-            <div className="flex items-center gap-2 p-3 bg-rose-950/60 border border-rose-500/50 rounded-xl text-xs text-rose-300 font-medium">
+            <div className="flex items-center gap-2 p-2.5 bg-rose-950/60 border border-rose-500/50 rounded-xl text-xs text-rose-300 font-medium">
               <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Modal Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition cursor-pointer"
+              className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300 transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 transition cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white shadow-lg shadow-rose-600/30 transition cursor-pointer active:scale-95"
             >
               <CheckCircle2 className="w-4 h-4" />
-              Confirm Disapproval & Lineup
+              Confirm Disapproval
             </button>
           </div>
 
