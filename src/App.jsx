@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from './components/Header.jsx';
 import StatsCards from './components/StatsCards.jsx';
 import FilterBar from './components/FilterBar.jsx';
@@ -14,23 +14,6 @@ const ORGANIZER_PIN = import.meta.env.VITE_ORGANIZER_PIN || '1234';
 const STORAGE_KEY = 'shhm_organizer_decisions_v1';
 
 export default function App() {
-  // Theme state (Dark Mode by default with soft contrast)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    try {
-      const saved = localStorage.getItem('shhm_theme_mode');
-      return saved ? saved === 'dark' : true;
-    } catch {
-      return true;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('shhm_theme_mode', isDarkMode ? 'dark' : 'light');
-    } catch {}
-    document.documentElement.classList.toggle('dark', isDarkMode);
-  }, [isDarkMode]);
-
   // Organizer decisions state (persisted in localStorage)
   const [organizerDecisions, setOrganizerDecisions] = useState(() => {
     try {
@@ -68,10 +51,14 @@ export default function App() {
   const [disapproveModalRunner, setDisapproveModalRunner] = useState(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filterMismatch, filterRequested, filterExpected, filterOrganizerStatus, filterEvidence, pageSize]);
+  // Helper filter setters that reset page to 1
+  const updateSearchQuery = (val) => { setSearchQuery(val); setCurrentPage(1); };
+  const updateFilterMismatch = (val) => { setFilterMismatch(val); setCurrentPage(1); };
+  const updateFilterRequested = (val) => { setFilterRequested(val); setCurrentPage(1); };
+  const updateFilterExpected = (val) => { setFilterExpected(val); setCurrentPage(1); };
+  const updateFilterOrganizerStatus = (val) => { setFilterOrganizerStatus(val); setCurrentPage(1); };
+  const updateFilterEvidence = (val) => { setFilterEvidence(val); setCurrentPage(1); };
+  const updatePageSize = (val) => { setPageSize(val); setCurrentPage(1); };
 
   // Toggle Organizer Status (Default Approved <-> Disapproved with PIN & Lineup Reassignment)
   const handleToggleStatus = (runnerId) => {
@@ -189,7 +176,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       
       {/* Top Header */}
       <Header
@@ -198,8 +185,6 @@ export default function App() {
         disapprovedCount={stats.disapprovedCount}
         onExport={() => setIsExportModalOpen(true)}
         onResetAll={stats.disapprovedCount > 0 ? handleResetAllDecisions : null}
-        isDarkMode={isDarkMode}
-        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
       />
 
       {/* Main Content Body */}
@@ -209,23 +194,23 @@ export default function App() {
         <StatsCards
           stats={stats}
           currentFilterMismatch={filterMismatch}
-          onToggleMismatchFilter={() => setFilterMismatch(!filterMismatch)}
+          onToggleMismatchFilter={() => updateFilterMismatch(!filterMismatch)}
         />
 
         {/* Filter Controls Toolbar */}
         <FilterBar
           searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
+          onSearchChange={updateSearchQuery}
           filterMismatch={filterMismatch}
-          onMismatchChange={setFilterMismatch}
+          onMismatchChange={updateFilterMismatch}
           filterRequested={filterRequested}
-          onRequestedChange={setFilterRequested}
+          onRequestedChange={updateFilterRequested}
           filterExpected={filterExpected}
-          onExpectedChange={setFilterExpected}
+          onExpectedChange={updateFilterExpected}
           filterOrganizerStatus={filterOrganizerStatus}
-          onOrganizerStatusChange={setFilterOrganizerStatus}
+          onOrganizerStatusChange={updateFilterOrganizerStatus}
           filterEvidence={filterEvidence}
-          onEvidenceChange={setFilterEvidence}
+          onEvidenceChange={updateFilterEvidence}
           onResetFilters={handleResetFilters}
           totalFilteredCount={filteredRunners.length}
           totalCount={stats.total}
@@ -242,7 +227,7 @@ export default function App() {
           currentPage={currentPage}
           pageSize={pageSize}
           onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
+          onPageSizeChange={updatePageSize}
           showEmail={SHOW_EMAIL}
         />
 
