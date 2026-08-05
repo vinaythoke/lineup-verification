@@ -74,7 +74,7 @@ function MultiSelectDropdown({
 
       {/* Floating Checkbox Menu */}
       {isOpen && (
-        <div className="absolute left-0 right-0 mt-1 z-40 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 text-xs space-y-0.5 animate-fade-in min-w-[150px]">
+        <div className="absolute left-0 right-0 mt-1 z-50 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 text-xs space-y-0.5 animate-fade-in min-w-[160px]">
           <div className="flex items-center justify-between px-2 py-1 text-[10px] text-slate-400 font-semibold border-b border-slate-800 mb-1">
             <span>Select Multiple</span>
             {selectedValues.length > 0 && (
@@ -106,6 +106,75 @@ function MultiSelectDropdown({
                 }`}>
                   {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SingleSelectDropdown({ 
+  label, 
+  options, 
+  value, 
+  onChange 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOpt = options.find(opt => opt.value === value) || options[0];
+  const isFiltered = value !== 'ALL';
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-[11px] font-medium text-slate-400 mb-1">{label}</label>
+      
+      {/* Dropdown Box Trigger */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full bg-slate-950 border rounded-lg px-2.5 py-1.5 text-xs text-left flex items-center justify-between transition cursor-pointer ${
+          isFiltered 
+            ? 'border-indigo-500 text-indigo-300 font-semibold bg-indigo-500/10' 
+            : 'border-slate-700/80 text-slate-200 hover:border-slate-600'
+        }`}
+      >
+        <span className="truncate pr-1">{selectedOpt ? selectedOpt.label : 'Select'}</span>
+        <ChevronDown className={`w-3.5 h-3.5 shrink-0 text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-indigo-400' : ''}`} />
+      </button>
+
+      {/* Floating Menu */}
+      {isOpen && (
+        <div className="absolute left-0 right-0 mt-1 z-50 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 text-xs space-y-0.5 animate-fade-in min-w-[160px]">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <div
+                key={opt.value}
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer transition select-none ${
+                  isSelected 
+                    ? 'bg-indigo-600/20 text-indigo-300 font-semibold' 
+                    : 'text-slate-300 hover:bg-slate-800/60'
+                }`}
+              >
+                <span>{opt.label}</span>
+                {isSelected && <Check className="w-3.5 h-3.5 text-indigo-400 stroke-[2.5]" />}
               </div>
             );
           })}
@@ -158,8 +227,27 @@ export default function FilterBar({
     { value: 'UNSPECIFIED', label: 'Blank / Unassigned (-)' }
   ];
 
+  const remarksOptions = [
+    { value: 'ALL', label: 'All Records' },
+    { value: 'WITH_REMARKS', label: 'Has Remarks Only 💬' },
+    { value: 'NO_REMARKS', label: 'No Remarks' }
+  ];
+
+  const organizerStatusOptions = [
+    { value: 'ALL', label: 'All Statuses' },
+    { value: 'APPROVED', label: 'Approved (Default)' },
+    { value: 'DISAPPROVED', label: 'Disapproved Only ⚠️' }
+  ];
+
+  const evidenceOptions = [
+    { value: 'ALL', label: 'All Evidence Types' },
+    { value: 'Certificate only', label: 'Certificate only' },
+    { value: 'Link only', label: 'Result Link only' },
+    { value: 'Both', label: 'Both Cert & Link' }
+  ];
+
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 shadow-xl backdrop-blur-md">
+    <div className="relative z-20 bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 shadow-xl backdrop-blur-md">
       
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-4">
         {/* Search Input */}
@@ -235,48 +323,29 @@ export default function FilterBar({
           placeholder="All AI Results (E, A, B, C, -)"
         />
 
-        {/* Audit Remarks Filter */}
-        <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Dev Remarks</label>
-          <select
-            value={filterRemarks}
-            onChange={(e) => onRemarksChange(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
-          >
-            <option value="ALL">All Records</option>
-            <option value="WITH_REMARKS">Has Remarks Only 💬</option>
-            <option value="NO_REMARKS">No Remarks</option>
-          </select>
-        </div>
+        {/* Single-Select Dropdown: Audit Remarks */}
+        <SingleSelectDropdown
+          label="Dev Remarks"
+          options={remarksOptions}
+          value={filterRemarks}
+          onChange={onRemarksChange}
+        />
 
-        {/* Organizer Review Status */}
-        <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Organizer Status</label>
-          <select
-            value={filterOrganizerStatus}
-            onChange={(e) => onOrganizerStatusChange(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="APPROVED">Approved (Default)</option>
-            <option value="DISAPPROVED">Disapproved Only ⚠️</option>
-          </select>
-        </div>
+        {/* Single-Select Dropdown: Organizer Status */}
+        <SingleSelectDropdown
+          label="Organizer Status"
+          options={organizerStatusOptions}
+          value={filterOrganizerStatus}
+          onChange={onOrganizerStatusChange}
+        />
 
-        {/* Evidence Provided */}
-        <div>
-          <label className="block text-[11px] font-medium text-slate-400 mb-1">Proof Provided</label>
-          <select
-            value={filterEvidence}
-            onChange={(e) => onEvidenceChange(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
-          >
-            <option value="ALL">All Evidence Types</option>
-            <option value="Certificate only">Certificate only</option>
-            <option value="Link only">Result Link only</option>
-            <option value="Both">Both Cert & Link</option>
-          </select>
-        </div>
+        {/* Single-Select Dropdown: Proof Provided */}
+        <SingleSelectDropdown
+          label="Proof Provided"
+          options={evidenceOptions}
+          value={filterEvidence}
+          onChange={onEvidenceChange}
+        />
 
       </div>
 
