@@ -61,8 +61,8 @@ export default function App() {
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMismatch, setFilterMismatch] = useState(false);
-  const [filterRequested, setFilterRequested] = useState('ALL');
-  const [filterExpected, setFilterExpected] = useState('ALL');
+  const [filterRequested, setFilterRequested] = useState([]); // array of selected requested lineups, e.g. ['E', 'A']
+  const [filterExpected, setFilterExpected] = useState([]); // array of selected AI result lineups, e.g. ['C', 'UNSPECIFIED']
   const [filterOrganizerStatus, setFilterOrganizerStatus] = useState('ALL');
   const [filterEvidence, setFilterEvidence] = useState('ALL');
   const [filterRemarks, setFilterRemarks] = useState('ALL'); // 'ALL', 'WITH_REMARKS', 'NO_REMARKS'
@@ -135,8 +135,8 @@ export default function App() {
   const handleResetFilters = () => {
     setSearchQuery('');
     setFilterMismatch(false);
-    setFilterRequested('ALL');
-    setFilterExpected('ALL');
+    setFilterRequested([]);
+    setFilterExpected([]);
     setFilterOrganizerStatus('ALL');
     setFilterEvidence('ALL');
     setFilterRemarks('ALL');
@@ -168,16 +168,20 @@ export default function App() {
       // 2. Mismatch Filter
       if (filterMismatch && !runner.isMismatch) return false;
 
-      // 3. Requested Lineup Filter
-      if (filterRequested !== 'ALL' && runner.requestedLineup !== filterRequested) return false;
+      // 3. Requested Lineup Multi-Select Filter
+      if (filterRequested.length > 0 && !filterRequested.includes(runner.requestedLineup)) {
+        return false;
+      }
 
-      // 4. AI Expected Lineup Filter
-      if (filterExpected !== 'ALL') {
-        if (filterExpected === 'UNSPECIFIED') {
-          if (runner.expectedLineup !== null && runner.expectedLineup !== undefined) return false;
-        } else {
-          if (runner.expectedLineup !== filterExpected) return false;
-        }
+      // 4. AI Expected Lineup Multi-Select Filter
+      if (filterExpected.length > 0) {
+        const exp = runner.expectedLineup;
+        const isUnspecified = exp === null || exp === undefined;
+        const matches = filterExpected.some(opt => {
+          if (opt === 'UNSPECIFIED') return isUnspecified;
+          return exp === opt;
+        });
+        if (!matches) return false;
       }
 
       // 5. Organizer Status Filter
