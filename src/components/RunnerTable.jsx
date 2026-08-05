@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   FileText, ExternalLink, AlertTriangle, CheckCircle, XCircle, 
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Info
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, Info, MessageSquare
 } from 'lucide-react';
 
 export default function RunnerTable({ 
@@ -177,6 +177,17 @@ export default function RunnerTable({
                   </div>
                 )}
 
+                {/* Dev Remarks Banner if Present */}
+                {runner.remarks && (
+                  <div className="flex items-start gap-1.5 text-xs bg-purple-950/40 p-2.5 rounded-lg border border-purple-500/40 text-purple-200">
+                    <MessageSquare className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-purple-300">Dev Audit Remark: </span>
+                      <span>{runner.remarks}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Proof Action Buttons */}
                 <div className="flex items-center justify-end gap-2 pt-1">
                   {runner.certificateFile ? (
@@ -334,6 +345,13 @@ export default function RunnerTable({
                           <span className="ml-1 font-mono text-slate-200">({runner.verifiedFinishTime})</span>
                         )}
                       </div>
+                      {runner.remarks && (
+                        <div className="mt-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-950/60 border border-purple-500/40 text-purple-200 text-[11px]" title={runner.remarks}>
+                          <MessageSquare className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                          <span className="font-semibold text-purple-300">Remark:</span>
+                          <span className="truncate max-w-[220px]">{runner.remarks}</span>
+                        </div>
+                      )}
                     </td>
 
                     {/* Organizer Status Toggle */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   X, ChevronLeft, ChevronRight, Download, ZoomIn, ZoomOut, RotateCw, 
-  ExternalLink, FileText, CheckCircle, XCircle, AlertTriangle 
+  ExternalLink, FileText, CheckCircle, XCircle, AlertTriangle, MessageSquare 
 } from 'lucide-react';
 
 export default function CertificateModal({ 
@@ -148,6 +148,14 @@ export default function CertificateModal({
           </div>
 
         </div>
+
+        {/* Dev Audit Remark Banner */}
+        {runner.remarks && (
+          <div className="bg-purple-950/80 border-b border-purple-500/30 px-3.5 sm:px-5 py-2 flex items-center gap-2 text-xs text-purple-200 shrink-0">
+            <MessageSquare className="w-4 h-4 text-purple-400 shrink-0" />
+            <span><strong className="text-purple-300">Dev Audit Remark:</strong> {runner.remarks}</span>
+          </div>
+        )}
 
         {/* Viewer Content Area */}
         <div className="flex-1 bg-slate-950/90 relative overflow-hidden flex items-center justify-center p-2 sm:p-4">

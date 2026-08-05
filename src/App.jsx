@@ -65,6 +65,7 @@ export default function App() {
   const [filterExpected, setFilterExpected] = useState('ALL');
   const [filterOrganizerStatus, setFilterOrganizerStatus] = useState('ALL');
   const [filterEvidence, setFilterEvidence] = useState('ALL');
+  const [filterRemarks, setFilterRemarks] = useState('ALL'); // 'ALL', 'WITH_REMARKS', 'NO_REMARKS'
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -82,6 +83,7 @@ export default function App() {
   const updateFilterExpected = (val) => { setFilterExpected(val); setCurrentPage(1); };
   const updateFilterOrganizerStatus = (val) => { setFilterOrganizerStatus(val); setCurrentPage(1); };
   const updateFilterEvidence = (val) => { setFilterEvidence(val); setCurrentPage(1); };
+  const updateFilterRemarks = (val) => { setFilterRemarks(val); setCurrentPage(1); };
   const updatePageSize = (val) => { setPageSize(val); setCurrentPage(1); };
 
   // Toggle Organizer Status (Default Approved <-> Disapproved with PIN & Lineup Reassignment)
@@ -137,16 +139,18 @@ export default function App() {
     setFilterExpected('ALL');
     setFilterOrganizerStatus('ALL');
     setFilterEvidence('ALL');
+    setFilterRemarks('ALL');
   };
 
   // Calculate Overall Stats
   const stats = useMemo(() => {
     const total = runnersData.length;
     const mismatchCount = runnersData.filter(r => r.isMismatch).length;
+    const remarksCount = runnersData.filter(r => Boolean(r.remarks)).length;
     const disapprovedCount = Object.values(organizerDecisions).filter(d => d.status === 'DISAPPROVED').length;
     const approvedCount = total - disapprovedCount;
 
-    return { total, mismatchCount, approvedCount, disapprovedCount };
+    return { total, mismatchCount, remarksCount, approvedCount, disapprovedCount };
   }, [organizerDecisions]);
 
   // Filter Runners
@@ -168,7 +172,13 @@ export default function App() {
       if (filterRequested !== 'ALL' && runner.requestedLineup !== filterRequested) return false;
 
       // 4. AI Expected Lineup Filter
-      if (filterExpected !== 'ALL' && runner.expectedLineup !== filterExpected) return false;
+      if (filterExpected !== 'ALL') {
+        if (filterExpected === 'UNSPECIFIED') {
+          if (runner.expectedLineup !== null && runner.expectedLineup !== undefined) return false;
+        } else {
+          if (runner.expectedLineup !== filterExpected) return false;
+        }
+      }
 
       // 5. Organizer Status Filter
       if (filterOrganizerStatus !== 'ALL') {
@@ -179,9 +189,16 @@ export default function App() {
       // 6. Evidence Provided Filter
       if (filterEvidence !== 'ALL' && runner.evidenceProvided !== filterEvidence) return false;
 
+      // 7. Dev Remarks Filter
+      if (filterRemarks !== 'ALL') {
+        const hasRemarks = Boolean(runner.remarks);
+        if (filterRemarks === 'WITH_REMARKS' && !hasRemarks) return false;
+        if (filterRemarks === 'NO_REMARKS' && hasRemarks) return false;
+      }
+
       return true;
     });
-  }, [searchQuery, filterMismatch, filterRequested, filterExpected, filterOrganizerStatus, filterEvidence, organizerDecisions]);
+  }, [searchQuery, filterMismatch, filterRequested, filterExpected, filterOrganizerStatus, filterEvidence, filterRemarks, organizerDecisions]);
 
   // Modal Navigation
   const certModalIndex = useMemo(() => {
@@ -221,6 +238,8 @@ export default function App() {
           stats={stats}
           currentFilterMismatch={filterMismatch}
           onToggleMismatchFilter={() => updateFilterMismatch(!filterMismatch)}
+          currentFilterRemarks={filterRemarks}
+          onToggleRemarksFilter={() => updateFilterRemarks(filterRemarks === 'WITH_REMARKS' ? 'ALL' : 'WITH_REMARKS')}
         />
 
         {/* Filter Controls Toolbar */}
@@ -237,6 +256,8 @@ export default function App() {
           onOrganizerStatusChange={updateFilterOrganizerStatus}
           filterEvidence={filterEvidence}
           onEvidenceChange={updateFilterEvidence}
+          filterRemarks={filterRemarks}
+          onRemarksChange={updateFilterRemarks}
           onResetFilters={handleResetFilters}
           totalFilteredCount={filteredRunners.length}
           totalCount={stats.total}

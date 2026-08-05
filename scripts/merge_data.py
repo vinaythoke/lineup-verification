@@ -70,15 +70,11 @@ def main():
             
         req_lineup = str(row1.get('requested_lineup_section')).strip() if row1.get('requested_lineup_section') else None
         exp_raw = row1.get('expected_lineup_section')
+        exp_lineup = str(exp_raw).strip() if exp_raw is not None and str(exp_raw).strip() != '' else None
 
-        if exp_raw:
-            exp_lineup = str(exp_raw).strip()
-        elif str(row1.get('verification_status')).strip() == 'Verified':
-            exp_lineup = req_lineup
-        else:
-            exp_lineup = 'C'
-        
-        is_mismatch = (req_lineup != exp_lineup)
+        remarks_val = str(row1.get('remarks')).strip() if row1.get('remarks') and str(row1.get('remarks')).strip() != '' else None
+
+        is_mismatch = (exp_lineup is not None and req_lineup != exp_lineup) or (remarks_val is not None)
         if is_mismatch:
             mismatch_count += 1
             
@@ -98,7 +94,7 @@ def main():
             'confidenceScore': row1.get('confidence_score'),
             'decidedBy': row1.get('decided_by'),
             'decidedOn': row1.get('decided_on'),
-            'remarks': str(row1.get('remarks')).strip() if row1.get('remarks') else None,
+            'remarks': remarks_val,
             'evidenceProvided': str(row2.get('evidence_provided')).strip() if row2.get('evidence_provided') else 'None',
             'resultLinkRaw': raw_text,
             'resultLinkClean': clean_url,
