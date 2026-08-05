@@ -18,6 +18,7 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
         }
 
         const headers = [
+          'Excel Row #',
           'Registration ID',
           'Runner Name',
           'Email',
@@ -39,6 +40,7 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
           const dec = organizerDecisions[r.id] || { status: 'APPROVED' };
           const finalLineup = dec.status === 'DISAPPROVED' ? (dec.assignedLineup || 'C') : (r.expectedLineup || 'C');
           return [
+            `"${r.index}"`,
             `"${r.id}"`,
             `"${(r.name || '').replace(/"/g, '""')}"`,
             `"${(r.email || '').replace(/"/g, '""')}"`,

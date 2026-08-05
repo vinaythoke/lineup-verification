@@ -107,8 +107,11 @@ export default function RunnerTable({
                 {/* Header: Name & Reg ID */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-bold text-slate-100 text-sm">{runner.name}</h3>
-                    <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-extrabold px-1.5 py-0.5 rounded bg-slate-800 text-indigo-300 border border-slate-700">#{runner.index}</span>
+                      <h3 className="font-bold text-slate-100 text-sm">{runner.name}</h3>
+                    </div>
+                    <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1 flex-wrap">
                       {showEmail && runner.email && <span>{runner.email}</span>}
                       {showEmail && runner.email && <span className="text-slate-600">•</span>}
                       <span className="font-mono text-slate-500 text-[10px]">{runner.id}</span>
@@ -235,6 +238,14 @@ export default function RunnerTable({
           <thead>
             <tr className="bg-slate-950/80 text-[11px] font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
               
+              {/* Row Index */}
+              <th className="py-3 px-3.5 w-16 text-center cursor-pointer hover:text-white transition" onClick={() => handleSort('index')}>
+                <div className="flex items-center justify-center gap-1">
+                  <span>#</span>
+                  <ArrowUpDown className="w-3 h-3 opacity-60" />
+                </div>
+              </th>
+
               {/* Runner Details */}
               <th className="py-3 px-4 cursor-pointer hover:text-white transition" onClick={() => handleSort('name')}>
                 <div className="flex items-center gap-1">
@@ -276,7 +287,7 @@ export default function RunnerTable({
           <tbody className="divide-y divide-slate-800/60 text-xs">
             {paginatedRunners.length === 0 ? (
               <tr>
-                <td colSpan="5" className="py-12 text-center text-slate-400">
+                <td colSpan="6" className="py-12 text-center text-slate-400">
                   No runners match your search & filter criteria.
                 </td>
               </tr>
@@ -299,6 +310,11 @@ export default function RunnerTable({
                           : ''
                     }`}
                   >
+                    
+                    {/* Row Index */}
+                    <td className="py-3 px-3.5 text-center font-mono text-xs font-bold text-indigo-300/90">
+                      #{runner.index}
+                    </td>
                     
                     {/* Runner Details */}
                     <td className="py-3 px-4">
