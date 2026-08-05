@@ -46,7 +46,7 @@ export default function StatsCards({
         </div>
       </div>
 
-      {/* Dev Audit Remarks Card (Clickable to filter!) */}
+      {/* Remarks Card (Clickable to filter!) */}
       <div 
         onClick={onToggleRemarksFilter}
         className={`border rounded-xl p-3 sm:p-4 flex items-center justify-between cursor-pointer transition ${
@@ -57,7 +57,7 @@ export default function StatsCards({
       >
         <div>
           <div className="flex items-center gap-1">
-            <p className="text-[10px] sm:text-xs font-semibold text-purple-300 uppercase tracking-wider">Dev Remarks</p>
+            <p className="text-[10px] sm:text-xs font-semibold text-purple-300 uppercase tracking-wider">Remarks</p>
             {currentFilterRemarks === 'WITH_REMARKS' && (
               <span className="text-[9px] sm:text-[10px] bg-purple-400 text-slate-950 font-bold px-1 py-0.5 rounded">Active</span>
             )}

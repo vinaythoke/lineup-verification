@@ -28,7 +28,7 @@ export default function ExportModal({ runners, organizerDecisions, onClose }) {
           'AI Result Lineup',
           'AI Verified Race Type',
           'AI Verified Finish Time',
-          'Dev Audit Remarks',
+          'Audit Remarks',
           'Organizer Decision',
           'Final Allotted Lineup',
           'Organizer Note / Reason',

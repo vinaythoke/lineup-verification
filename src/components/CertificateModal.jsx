@@ -149,11 +149,11 @@ export default function CertificateModal({
 
         </div>
 
-        {/* Dev Audit Remark Banner */}
+        {/* Audit Remark Banner */}
         {runner.remarks && (
           <div className="bg-purple-950/80 border-b border-purple-500/30 px-3.5 sm:px-5 py-2 flex items-center gap-2 text-xs text-purple-200 shrink-0">
             <MessageSquare className="w-4 h-4 text-purple-400 shrink-0" />
-            <span><strong className="text-purple-300">Dev Audit Remark:</strong> {runner.remarks}</span>
+            <span><strong className="text-purple-300">Audit Remark:</strong> {runner.remarks}</span>
           </div>
         )}
 

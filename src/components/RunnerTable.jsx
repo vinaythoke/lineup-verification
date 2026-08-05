@@ -180,12 +180,12 @@ export default function RunnerTable({
                   </div>
                 )}
 
-                {/* Dev Remarks Banner if Present */}
+                {/* Audit Remarks Banner if Present */}
                 {runner.remarks && (
                   <div className="flex items-start gap-1.5 text-xs bg-purple-950/40 p-2.5 rounded-lg border border-purple-500/40 text-purple-200">
                     <MessageSquare className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
                     <div>
-                      <span className="font-bold text-purple-300">Dev Audit Remark: </span>
+                      <span className="font-bold text-purple-300">Audit Remark: </span>
                       <span>{runner.remarks}</span>
                     </div>
                   </div>

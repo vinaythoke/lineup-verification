@@ -297,7 +297,7 @@ export default function FilterBar({
             }`}
           >
             <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
-            <span>Has Dev Remarks Only</span>
+            <span>Has Remarks Only</span>
           </button>
         </div>
       </div>
@@ -325,7 +325,7 @@ export default function FilterBar({
 
         {/* Single-Select Dropdown: Audit Remarks */}
         <SingleSelectDropdown
-          label="Dev Remarks"
+          label="Remarks"
           options={remarksOptions}
           value={filterRemarks}
           onChange={onRemarksChange}
