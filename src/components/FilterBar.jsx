@@ -1,4 +1,119 @@
-import { Search, X, AlertTriangle, MessageSquare } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Search, X, AlertTriangle, MessageSquare, ChevronDown, Check } from 'lucide-react';
+
+function MultiSelectDropdown({ 
+  label, 
+  options, 
+  selectedValues = [], 
+  onChange, 
+  placeholder = "All" 
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleOption = (val) => {
+    if (selectedValues.includes(val)) {
+      onChange(selectedValues.filter(item => item !== val));
+    } else {
+      onChange([...selectedValues, val]);
+    }
+  };
+
+  const getDisplayText = () => {
+    if (selectedValues.length === 0 || selectedValues.length === options.length) {
+      return placeholder;
+    }
+    const selectedLabels = options
+      .filter(opt => selectedValues.includes(opt.value))
+      .map(opt => opt.label);
+    if (selectedLabels.length <= 2) return selectedLabels.join(', ');
+    return `${selectedLabels.length} Selected`;
+  };
+
+  const isFiltered = selectedValues.length > 0 && selectedValues.length < options.length;
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <label className="block text-[11px] font-medium text-slate-400 mb-1">{label}</label>
+      
+      {/* Dropdown Box Trigger */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full bg-slate-950 border rounded-lg px-2.5 py-1.5 text-xs text-left flex items-center justify-between transition cursor-pointer ${
+          isFiltered 
+            ? 'border-indigo-500 text-indigo-300 font-semibold bg-indigo-500/10' 
+            : 'border-slate-700/80 text-slate-200 hover:border-slate-600'
+        }`}
+      >
+        <span className="truncate pr-1">{getDisplayText()}</span>
+        <div className="flex items-center gap-1 shrink-0 text-slate-400">
+          {isFiltered && (
+            <span 
+              onClick={(e) => { e.stopPropagation(); onChange([]); }}
+              className="p-0.5 hover:text-white hover:bg-slate-800 rounded"
+              title="Clear selection"
+            >
+              <X className="w-3 h-3" />
+            </span>
+          )}
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isOpen ? 'rotate-180 text-indigo-400' : ''}`} />
+        </div>
+      </button>
+
+      {/* Floating Checkbox Menu */}
+      {isOpen && (
+        <div className="absolute left-0 right-0 mt-1 z-40 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl p-1.5 text-xs space-y-0.5 animate-fade-in min-w-[150px]">
+          <div className="flex items-center justify-between px-2 py-1 text-[10px] text-slate-400 font-semibold border-b border-slate-800 mb-1">
+            <span>Select Multiple</span>
+            {selectedValues.length > 0 && (
+              <button 
+                type="button"
+                onClick={() => onChange([])} 
+                className="text-indigo-400 hover:underline cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {options.map((opt) => {
+            const isChecked = selectedValues.includes(opt.value);
+            return (
+              <div
+                key={opt.value}
+                onClick={() => toggleOption(opt.value)}
+                className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer transition select-none ${
+                  isChecked 
+                    ? 'bg-indigo-600/20 text-indigo-300 font-semibold' 
+                    : 'text-slate-300 hover:bg-slate-800/60'
+                }`}
+              >
+                <span>{opt.label}</span>
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${
+                  isChecked ? 'bg-indigo-600 border-indigo-400 text-white' : 'border-slate-700 bg-slate-950'
+                }`}>
+                  {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function FilterBar({
   searchQuery,
@@ -29,13 +144,19 @@ export default function FilterBar({
     filterEvidence !== 'ALL' ||
     filterRemarks !== 'ALL';
 
-  const toggleArrayOption = (currentArr, option, onChange) => {
-    if (currentArr.includes(option)) {
-      onChange(currentArr.filter(item => item !== option));
-    } else {
-      onChange([...currentArr, option]);
-    }
-  };
+  const requestedOptions = [
+    { value: 'E', label: 'Lineup E (Elite)' },
+    { value: 'A', label: 'Lineup A' },
+    { value: 'B', label: 'Lineup B' }
+  ];
+
+  const expectedOptions = [
+    { value: 'E', label: 'Lineup E (Elite)' },
+    { value: 'A', label: 'Lineup A' },
+    { value: 'B', label: 'Lineup B' },
+    { value: 'C', label: 'Lineup C (Demoted)' },
+    { value: 'UNSPECIFIED', label: 'Blank / Unassigned (-)' }
+  ];
 
   return (
     <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 mb-6 shadow-xl backdrop-blur-md">
@@ -93,92 +214,30 @@ export default function FilterBar({
         </div>
       </div>
 
-      {/* Multi-Select Filters Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 pt-3 border-t border-slate-800/80">
+      {/* Filter Dropdowns Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-3 pt-3 border-t border-slate-800/80">
         
-        {/* Multi-Select Requested Lineup */}
-        <div className="sm:col-span-1 lg:col-span-2">
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-[11px] font-semibold text-slate-300">
-              Requested Lineup <span className="text-[10px] text-slate-500 font-normal">(Multi-select)</span>
-            </label>
-            {filterRequested.length > 0 && (
-              <button 
-                onClick={() => onRequestedChange([])} 
-                className="text-[10px] text-indigo-400 hover:underline cursor-pointer"
-              >
-                Reset
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {['E', 'A', 'B'].map((section) => {
-              const isSelected = filterRequested.includes(section);
-              return (
-                <button
-                  key={section}
-                  type="button"
-                  onClick={() => toggleArrayOption(filterRequested, section, onRequestedChange)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer active:scale-95 ${
-                    isSelected
-                      ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/20'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
-                  }`}
-                >
-                  Lineup {section}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* Multi-Select Dropdown: Requested Lineup */}
+        <MultiSelectDropdown
+          label="Requested Lineup"
+          options={requestedOptions}
+          selectedValues={filterRequested}
+          onChange={onRequestedChange}
+          placeholder="All Requested (E, A, B)"
+        />
 
-        {/* Multi-Select AI Result Lineup */}
-        <div className="sm:col-span-1 lg:col-span-2">
-          <div className="flex items-center justify-between mb-1">
-            <label className="text-[11px] font-semibold text-slate-300">
-              AI Result Lineup <span className="text-[10px] text-slate-500 font-normal">(Multi-select)</span>
-            </label>
-            {filterExpected.length > 0 && (
-              <button 
-                onClick={() => onExpectedChange([])} 
-                className="text-[10px] text-indigo-400 hover:underline cursor-pointer"
-              >
-                Reset
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {[
-              { id: 'E', label: 'E' },
-              { id: 'A', label: 'A' },
-              { id: 'B', label: 'B' },
-              { id: 'C', label: 'C' },
-              { id: 'UNSPECIFIED', label: 'Blank (-)' }
-            ].map((item) => {
-              const isSelected = filterExpected.includes(item.id);
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => toggleArrayOption(filterExpected, item.id, onExpectedChange)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer active:scale-95 ${
-                    isSelected
-                      ? item.id === 'C'
-                        ? 'bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/20'
-                        : 'bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-600/20'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-slate-200'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        {/* Multi-Select Dropdown: AI Result Lineup */}
+        <MultiSelectDropdown
+          label="AI Result Lineup"
+          options={expectedOptions}
+          selectedValues={filterExpected}
+          onChange={onExpectedChange}
+          placeholder="All AI Results (E, A, B, C, -)"
+        />
 
         {/* Audit Remarks Filter */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-300 mb-1">Dev Remarks</label>
+          <label className="block text-[11px] font-medium text-slate-400 mb-1">Dev Remarks</label>
           <select
             value={filterRemarks}
             onChange={(e) => onRemarksChange(e.target.value)}
@@ -192,7 +251,7 @@ export default function FilterBar({
 
         {/* Organizer Review Status */}
         <div>
-          <label className="block text-[11px] font-semibold text-slate-300 mb-1">Organizer Status</label>
+          <label className="block text-[11px] font-medium text-slate-400 mb-1">Organizer Status</label>
           <select
             value={filterOrganizerStatus}
             onChange={(e) => onOrganizerStatusChange(e.target.value)}
@@ -201,6 +260,21 @@ export default function FilterBar({
             <option value="ALL">All Statuses</option>
             <option value="APPROVED">Approved (Default)</option>
             <option value="DISAPPROVED">Disapproved Only ⚠️</option>
+          </select>
+        </div>
+
+        {/* Evidence Provided */}
+        <div>
+          <label className="block text-[11px] font-medium text-slate-400 mb-1">Proof Provided</label>
+          <select
+            value={filterEvidence}
+            onChange={(e) => onEvidenceChange(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+          >
+            <option value="ALL">All Evidence Types</option>
+            <option value="Certificate only">Certificate only</option>
+            <option value="Link only">Result Link only</option>
+            <option value="Both">Both Cert & Link</option>
           </select>
         </div>
 
