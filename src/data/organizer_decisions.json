@@ -123,5 +123,10 @@
     "status": "DISAPPROVED",
     "assignedLineup": "B",
     "note": ""
+  },
+  "9a4ab7bf-505c-4517-8274-62d7e3c8f79a": {
+    "status": "DISAPPROVED",
+    "assignedLineup": "C",
+    "note": ""
   }
 }
