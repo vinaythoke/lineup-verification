@@ -70,11 +70,17 @@ def main():
             
         req_lineup = str(row1.get('requested_lineup_section')).strip() if row1.get('requested_lineup_section') else None
         exp_raw = row1.get('expected_lineup_section')
-        exp_lineup = str(exp_raw).strip() if exp_raw is not None and str(exp_raw).strip() != '' else None
-
+        exp_assigned = str(exp_raw).strip() if exp_raw is not None and str(exp_raw).strip() != '' else None
         remarks_val = str(row1.get('remarks')).strip() if row1.get('remarks') and str(row1.get('remarks')).strip() != '' else None
 
-        is_mismatch = (exp_lineup is not None and req_lineup != exp_lineup) or (remarks_val is not None)
+        if exp_assigned is not None:
+            exp_lineup = exp_assigned
+        elif remarks_val is not None:
+            exp_lineup = None  # Keep empty/unassigned for records with remarks
+        else:
+            exp_lineup = req_lineup  # Show AI result same as Requested for clean empty records
+
+        is_mismatch = (exp_lineup is None) or (req_lineup != exp_lineup) or (remarks_val is not None)
         if is_mismatch:
             mismatch_count += 1
             
