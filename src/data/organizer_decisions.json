@@ -353,5 +353,10 @@
     "status": "DISAPPROVED",
     "assignedLineup": "A",
     "note": ""
+  },
+  "57ddafe0-4287-4813-b4c5-9c2433ec06e5": {
+    "status": "DISAPPROVED",
+    "assignedLineup": "C",
+    "note": ""
   }
 }
