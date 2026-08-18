@@ -6,6 +6,7 @@ import RunnerTable from './components/RunnerTable.jsx';
 import CertificateModal from './components/CertificateModal.jsx';
 import ExportModal from './components/ExportModal.jsx';
 import DisapproveModal from './components/DisapproveModal.jsx';
+import PinLockScreen from './components/PinLockScreen.jsx';
 import runnersData from './data/runners.json';
 import { fetchGitHubDecisions, saveGitHubDecisionsMap, resetGitHubDecisionsMap } from './services/githubSync.js';
 
@@ -13,8 +14,37 @@ const BUNNY_CDN_URL = import.meta.env.VITE_BUNNY_CDN_URL || 'https://runsatara.b
 const SHOW_EMAIL = import.meta.env.VITE_SHOW_RUNNER_EMAIL === 'true';
 const ORGANIZER_PIN = import.meta.env.VITE_ORGANIZER_PIN || '1234';
 const STORAGE_KEY = 'shhm_organizer_decisions_v1';
+const SESSION_AUTH_KEY = 'shhm_organizer_authenticated_session';
 
 export default function App() {
+  // Session Authentication State (verified via VITE_ORGANIZER_PIN for every browser session)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+    } catch (e) {
+      console.error('Failed to load session authentication state:', e);
+      return false;
+    }
+  });
+
+  const handleUnlock = () => {
+    try {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+    } catch (e) {
+      console.error('Failed to save session authentication:', e);
+    }
+    setIsAuthenticated(true);
+  };
+
+  const handleLockSession = () => {
+    try {
+      sessionStorage.removeItem(SESSION_AUTH_KEY);
+    } catch (e) {
+      console.error('Failed to remove session authentication:', e);
+    }
+    setIsAuthenticated(false);
+  };
+
   // Organizer decisions state
   const [organizerDecisions, setOrganizerDecisions] = useState(() => {
     try {
@@ -25,6 +55,7 @@ export default function App() {
       return {};
     }
   });
+
 
   // Save to localStorage
   useEffect(() => {
@@ -222,6 +253,16 @@ export default function App() {
     }
   };
 
+  // If session is not authenticated with Organizer PIN, show Lock Screen
+  if (!isAuthenticated) {
+    return (
+      <PinLockScreen
+        securityPin={ORGANIZER_PIN}
+        onUnlock={handleUnlock}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       
@@ -232,7 +273,9 @@ export default function App() {
         disapprovedCount={stats.disapprovedCount}
         onExport={() => setIsExportModalOpen(true)}
         onResetAll={stats.disapprovedCount > 0 ? handleResetAllDecisions : null}
+        onLock={handleLockSession}
       />
+
 
       {/* Main Content Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">

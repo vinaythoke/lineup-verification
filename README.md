@@ -19,8 +19,9 @@ This application utilizes **[JSONBlob](https://jsonblob.com/)** for **100% free,
 ## 🌟 Key Features
 
 - **⚡ Instant Search & Multi-Filter**: Filter 3,104 runners by Name, Registration ID, Mismatches, Claimed Lineup, AI Result, Evidence Type, or Organizer Decision.
+- **🛡️ Session-Level PIN Security**: Requires entering the Organizer Security PIN (`VITE_ORGANIZER_PIN`) on every browser session before displaying the dashboard, complete with touch-friendly quick numpad, shake animation feedback, and a one-click session lock button.
 - **📱 Fully Responsive Mobile Design**: Automatically transforms into an app-like card layout on mobile devices (`< 768px`) with touch targets, while retaining the full interactive data grid on desktops (`≥ 768px`).
-- **☁️ Multi-Organizer Real-Time Sync**: Shared persistence powered by **JSONBlob** across all devices.
+- **☁️ Multi-Organizer Real-Time Sync**: Shared persistence powered by **GitHub REST API / Cloud Sync** across all devices.
 - **🔐 PIN-Authorized Disapproval & Reassignment**:
   - All runners default to **Approved**.
   - Disapproving a runner requires entering an **Organizer Security PIN** (configured via `.env`) and allows assigning a final lineup section (`E`, `A`, `B`, or `C`) along with an optional reason note.
@@ -29,6 +30,7 @@ This application utilizes **[JSONBlob](https://jsonblob.com/)** for **100% free,
   - Zoom in/out, rotate 90°, and continuous keyboard arrow (`Left` / `Right`) navigation.
 - **📊 Instant CSV Audit Report Export**:
   - Export full runner audit reports or filtered disapproved lists with UTF-8 BOM (`\uFEFF`) and Base64 Data URL streaming for instant cross-browser downloads.
+
 
 ---
 
